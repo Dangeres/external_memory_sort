@@ -16,6 +16,7 @@ function memoryUsagePrint() {
     return process.memoryUsage().heapUsed / ONE_MB;
 }
 
+
 function generateRandomString(myLength) {
     const chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
 
@@ -145,15 +146,16 @@ function main() {
     let minimal_values_file = { };
 
     const all_files = getListFilesDir(temp_dir);
+    let out_data = [];
+    let readed_data;
+    let result;
 
     all_files.forEach(file => {
-        let rr = readChunkSync(temp_dir + file, {length: CHUNK_SIZE, startPosition: 0});
-        let result = stringSplitLines(rr);
+        readed_data = readChunkSync(temp_dir + file, {length: CHUNK_SIZE, startPosition: 0});
+        result = stringSplitLines(readed_data);
 
         minimal_values_file[file] = result.pop();
     });
-
-    let out_data = [];
 
     while (true) {
         let minimal = {
@@ -161,10 +163,10 @@ function main() {
             "file": undefined,
         };
 
-        for (const [file, value] of Object.entries(minimal_values_file) ) {
-            if (minimal['value'] === undefined || value < minimal['value']) {
+        for (let file in minimal_values_file) {
+            if (minimal['value'] === undefined || minimal_values_file[file] < minimal['value']) {
                 minimal = {
-                    "value": value,
+                    "value": minimal_values_file[file],
                     "file": file,
                 };
             }
@@ -174,10 +176,10 @@ function main() {
             break;
         }
 
-        let rr = readChunkSync(temp_dir + minimal['file'], {length: CHUNK_SIZE, startPosition: 0});
-        let result = stringSplitLines(rr);
+        readed_data = readChunkSync(temp_dir + minimal['file'], {length: CHUNK_SIZE, startPosition: 0});
+        result = stringSplitLines(readed_data);
 
-        const minimal_value_file = result.pop();
+        result.pop();
 
         if (result.length > 0) {
             fs.truncateSync(
@@ -185,37 +187,17 @@ function main() {
                 fs.statSync(temp_dir + minimal['file']).size - minimal['value'].length - '\n'.length,
             )
 
-            // writeFile(
-            //     temp_dir + minimal['file'],
-            //     result.join('\n'),
-            // )
-
             minimal_values_file[minimal['file']] = result.pop();
         } else {
-            fs.unlinkSync(temp_dir + minimal['file']);
+            fs.rmSync(temp_dir + minimal['file']);
 
             delete minimal_values_file[minimal['file']];
         }
 
-        if (false) { // an old thing
-            out_data.push(minimal_value_file);
-
-            if (out_data.length == 100) {
-                fs.appendFileSync(
-                    output_file_name,
-                    out_data.join('\n') + "\n",
-                );
-
-                out_data = [];
-            }
-
-        } else {
-            fs.appendFileSync(
-                output_file_name,
-                minimal['value'] + "\n",
-            );
-        }
-        
+        fs.appendFileSync(
+            output_file_name,
+            minimal['value'] + "\n",
+        );
     }
 
     if (out_data.length > 0) {
