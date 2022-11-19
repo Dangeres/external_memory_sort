@@ -1,26 +1,38 @@
 let fs = require('fs');
-let crypto = require('crypto');
+// let crypto = require('crypto');
 
 const input_file_name = 'test.txt';
 const output_file_name = 'out.txt';
 const temp_dir = 'temp_files/';
 const ONE_MB = 1024 * 1024;
-const CHUNK_SIZE =  25 * ONE_MB;
+const CHUNK_SIZE =  250 * ONE_MB;
 // const CHUNK_SIZE =  2 * 103;
 
 Date.prototype.toUnixTime = function() { return this.getTime() /1000 | 0 };
 Date.time = function() { return new Date().toUnixTime(); }
 
 
-function memoryUsagePrint () {
+function memoryUsagePrint() {
     const used = process.memoryUsage().heapUsed / ONE_MB;
 
     console.log(`The script uses approximately ${Math.round(used * 100) / 100} MB`);
 }
 
+function generateRandomString(myLength) {
+    const chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
 
-function generateFileName () {
-    return crypto.createHash('sha-256').update(String(Date.now())).digest('hex') + ".txt";
+    const randomArray = Array.from(
+        { length: myLength },
+        (v, k) => chars[Math.floor(Math.random() * chars.length)]
+    );
+
+    return randomArray.join("");
+};
+
+
+function generateFileName() {
+    return String(Date.now()) + generateRandomString(20) + ".txt";
+    // return crypto.createHash('sha-256').update(String(Date.now())).digest('hex') + ".txt";
 }
 
 
@@ -91,13 +103,13 @@ function getListFilesDir(path) {
 function main() {
     fs.rmSync(temp_dir, { recursive: true, force: true });
 
-    try {
-        fs.unlinkSync(output_file_name);
-    } catch (error) { }
-
     if (!fs.existsSync(temp_dir)){
         fs.mkdirSync(temp_dir, { recursive: true });
     }
+
+    try {
+        fs.unlinkSync(output_file_name);
+    } catch (error) { }
 
     let shift = 0;
 
@@ -217,7 +229,7 @@ function main() {
         out_data = [];
     }
 
-    console.log('ended for ' + (Date.time() - start_time));
+    console.log(`ended for ${(Date.time() - start_time)} seconds.`);
 }
 
 main()
