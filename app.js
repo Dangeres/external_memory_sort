@@ -31,7 +31,7 @@ function generateRandomString(myLength) {
 
 
 function generateFileName() {
-    return String(Date.now()) + generateRandomString(20) + ".txt";
+    return generateRandomString(30) + ".txt";
     // return crypto.createHash('sha-256').update(String(Date.now())).digest('hex') + ".txt";
 }
 
