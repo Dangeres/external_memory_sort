@@ -5,7 +5,7 @@ const input_file_name = 'test.txt';
 const output_file_name = 'out.txt';
 const temp_dir = 'temp_files/';
 const ONE_MB = 1024 * 1024;
-const CHUNK_SIZE =  250 * ONE_MB;
+const CHUNK_SIZE =  10 * ONE_MB;
 // const CHUNK_SIZE =  2 * 103;
 
 Date.prototype.toUnixTime = function() { return this.getTime() /1000 | 0 };
@@ -13,9 +13,7 @@ Date.time = function() { return new Date().toUnixTime(); }
 
 
 function memoryUsagePrint() {
-    const used = process.memoryUsage().heapUsed / ONE_MB;
-
-    console.log(`The script uses approximately ${Math.round(used * 100) / 100} MB`);
+    return process.memoryUsage().heapUsed / ONE_MB;
 }
 
 function generateRandomString(myLength) {
